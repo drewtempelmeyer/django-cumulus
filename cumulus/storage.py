@@ -211,7 +211,8 @@ class CloudFilesStorage(Storage):
         try:
             (host, port, path, is_ssl) = self.connection.connection_args
             storage_url = 'https://%s:%d/%s' % (host, port, path)
-            head_object(storage_url, self.connection.token, self.container_name, name):
+            head_object(storage_url, self.connection.token, self.container_name,
+                name)
             return True
         except ClientException:
             return False
