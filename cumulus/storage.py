@@ -7,6 +7,8 @@ from StringIO import StringIO
 import cloudfiles
 from cloudfiles.errors import NoSuchObject, ResponseError
 
+from swiftclient.client import head_object, ClientException
+
 from django.core.files.base import File, ContentFile
 from django.core.files.storage import Storage
 
@@ -19,7 +21,7 @@ HEADER_PATTERNS = tuple((re.compile(p), h) for p, h in CUMULUS.get('HEADERS', {}
 def sync_headers(cloud_obj, headers={}, header_patterns=HEADER_PATTERNS):
     """
     Overwrite the given cloud_obj's headers with the ones given as ``headers`
-    and add additional headers as defined in the HEADERS setting depending on 
+    and add additional headers as defined in the HEADERS setting depending on
     the cloud_obj's file name.
     """
     # don't set headers on directories
@@ -207,9 +209,11 @@ class CloudFilesStorage(Storage):
         the storage system, or False if the name is available for a new file.
         """
         try:
-            self._get_cloud_obj(name)
+            (host, port, path, is_ssl) = self.connection.connection_args
+            storage_url = 'https://%s:%d/%s' % (host, port, path)
+            head_object(storage_url, self.connection.token, self.container_name, name):
             return True
-        except NoSuchObject:
+        except ClientException:
             return False
 
     def listdir(self, path):
@@ -271,7 +275,7 @@ class CloudFilesStorage(Storage):
         # depending on whether or not we pre-loaded objects.
         # When pre-loaded, timezone is not included but we
         # assume UTC. Since FileStorage returns localtime, and
-        # collectstatic compares these dates, we need to depend 
+        # collectstatic compares these dates, we need to depend
         # on dateutil to help us convert timezones.
         try:
            from dateutil import parser, tz

@@ -13,8 +13,7 @@ setup(
     name = "django-cumulus",
     version = __import__('cumulus').get_version().replace(' ', '-'),
     packages = find_packages(),
-    install_requires = ['python-cloudfiles>=1.7.10'],
-
+    install_requires = ['python-cloudfiles>=1.7.10', 'pthon-swiftclient>=1.3.0'],
     author = "Rich Leland",
     author_email = "rich@richleland.com",
     license = 'BSD',
